@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <sstream>
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
@@ -66,9 +67,26 @@ int main(int argc, char **argv) {
 
 char buffer[1024] = {0};
 recv(client_fd, buffer, sizeof(buffer), 0);
+std::string request(buffer);
+std::istringstream request_stream(request);
 
-const char* response = "HTTP/1.1 200 OK\r\n\r\n";
-send(client_fd, response, strlen(response), 0);
+std::string method;
+std::string path;
+std::string version;
+
+request_stream >> method >> path >> version;
+
+std::cout << "Requested path: " << path << std::endl;
+
+std::string response;
+
+if (path == "/") {
+    response = "HTTP/1.1 200 OK\r\n\r\n";
+} else {
+    response = "HTTP/1.1 404 Not Found\r\n\r\n";
+}
+
+send(client_fd, response.c_str(), response.size(), 0);
 
   close(client_fd);
 
