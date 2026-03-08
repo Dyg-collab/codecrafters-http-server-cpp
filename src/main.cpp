@@ -82,6 +82,13 @@ std::string response;
 
 if (path == "/") {
     response = "HTTP/1.1 200 OK\r\n\r\n";
+} else if(path.size() >= 6 && path.substr(0,6) == "/echo/"){
+    std::string msg = path.substr(6);
+
+    response = 
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/plain\r\n"
+    "Content-Length: " + std::to_string(msg.size()) + "\r\n\r\n" + msg;
 } else {
     response = "HTTP/1.1 404 Not Found\r\n\r\n";
 }
