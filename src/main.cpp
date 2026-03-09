@@ -80,6 +80,20 @@ std::cout << "Requested path: " << path << std::endl;
 
 std::string response;
 
+std::string user_agent;
+std::string line;
+
+while(std::getline(request_stream,line)){
+  if(line.substr(0,11) == "User-Agent:"){
+    user_agent = line.substr(12);
+
+    if(!user_agent.empty() && user_agent.back()=='\r'){
+      user_agent.pop_back();
+    }
+    break;
+  }
+}
+
 if (path == "/") {
     response = "HTTP/1.1 200 OK\r\n\r\n";
 } else if(path.size() >= 6 && path.substr(0,6) == "/echo/"){
@@ -89,7 +103,12 @@ if (path == "/") {
     "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/plain\r\n"
     "Content-Length: " + std::to_string(msg.size()) + "\r\n\r\n" + msg;
-} else {
+} else if(path == "/user-agent"){
+    response =
+    "HTTP/1.1 200 OK\r\n"
+    "Content-Type: text/plain\r\n"
+    "Content-Length: " + std::to_string(user_agent.size()) + "\r\n\r\n" + user_agent;
+    } else {
     response = "HTTP/1.1 404 Not Found\r\n\r\n";
 }
 
