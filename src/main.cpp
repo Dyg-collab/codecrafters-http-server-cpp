@@ -9,8 +9,9 @@
 #include <netdb.h>
 #include <sstream>
 #include <thread>
+#include <fstream>
 
-void handle_client(int client_fd){
+void handle_client(int client_fd , std::string directory){
   char buffer[1024] = {0};
 ssize_t bytes= recv(client_fd, buffer, sizeof(buffer), 0);
 
@@ -59,9 +60,23 @@ if (path == "/") {
     "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/plain\r\n"
     "Content-Length: " + std::to_string(user_agent.size()) + "\r\n\r\n" + user_agent;
-    } else {
+    }  else if(path.size()>=7 && path.substr(0,7)=="/files/"){
+      std::string filename = path.substr(7);
+      std::ifstream file(directory + "/" +filename);
+      if(!file.is_open()){
+        response = "HTTP/1.1 404 Not Found\r\n\r\n";
+      } else {
+      std::stringstream buffer;
+      buffer<<file.rdbuf(); // rdbuf = raw data buffer
+      std::string body = buffer.str();
+      
+      response = 
+      "HTTP/1.1 200 OK\r\n"
+      "Content-Type: application/octet-stream\r\n"
+      "Content-Length: "+std::to_string(body.size()) + "\r\n\r\n" + body;}
+      } else {
     response = "HTTP/1.1 404 Not Found\r\n\r\n";
-}
+} 
 
 send(client_fd, response.c_str(), response.size(), 0);
 
@@ -114,6 +129,11 @@ int main(int argc, char **argv) {
   
   std::cout << "Waiting for a client to connect...\n";
   
+ std::string directory = "";
+ if(argc >=3){
+  directory = argv[2];
+ }
+
   while(true){
 
   int client_fd = accept(server_fd, 
@@ -125,7 +145,7 @@ int main(int argc, char **argv) {
       continue;
   }
 
-  std::thread t(handle_client,client_fd);
+  std::thread t(handle_client,client_fd,directory);
   t.detach();
   }
   return 0;
