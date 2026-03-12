@@ -1,37 +1,66 @@
 [![progress-banner](https://backend.codecrafters.io/progress/http-server/b16220d0-d32e-4c39-a0d9-534b8e7eebdd)](https://app.codecrafters.io/users/Dyg-collab?r=2qF)
 
-This is a starting point for C++ solutions to the
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
+# HTTP Server (C++)
 
-[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
-protocol that powers the web. In this challenge, you'll build a HTTP/1.1 server
-that is capable of serving multiple clients.
+[![build passing](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/)
+[![language C++](https://img.shields.io/badge/language-C%2B%2B-blue.svg)](https://isocpp.org/)
+[![license MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Along the way you'll learn about TCP servers,
-[HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
-and more.
+A concise, from-scratch HTTP/1.1 server implemented in modern C++ showcasing low-level socket programming, request parsing, file serving, and simple concurrency.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+Built as part of the **Build Your Own HTTP Server** challenge on CodeCrafters.
 
-# Passing the first stage
+---
 
-The entry point for your HTTP server implementation is in `src/main.cpp`. Study
-and uncomment the relevant code, and push your changes to pass the first stage:
+## Table of contents
 
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
-```
+- [Why this project](#why-this-project)  
+- [Highlights](#highlights)  
+- [Quickstart](#quickstart)  
+- [Usage examples](#usage-examples)  
+- [Design & architecture](#design--architecture)  
+- [Progress & changelog](#progress--changelog)  
+- [Roadmap](#roadmap)  
+- [Contributing & intern notes](#contributing--intern-notes)  
+- [License & author](#license--author)
 
-Time to move on to the next stage!
+---
 
-# Stage 2 & beyond
+## Why this project
 
-Note: This section is for stages 2 and beyond.
+This repo is a compact, focused demonstration of systems-level skills valuable for internships and junior systems roles:
 
-1. Ensure you have `cmake` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main.cpp`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+- networking fundamentals (sockets, TCP)  
+- protocol parsing (HTTP request line, headers, body)  
+- filesystem interaction (serve and create files)  
+- concurrency basics (per-connection threads)  
+- clear commit-driven progression (stage-based development)
+
+---
+
+## Highlights
+
+- Clean, single-file entry point: `src/main.cpp` (easy to read / run)
+- Implements core HTTP features and routing:
+  - `/` root
+  - `/echo/{text}`
+  - `/files/{filename}` (GET → serve file)
+- Concurrent connections via `std::thread`
+- Stage-based workflow (follows CodeCrafters stages for rapid iteration)
+- Minimal external dependencies — pure STL + POSIX sockets
+
+---
+
+## Quickstart
+
+```bash
+# clone
+git clone https://github.com/Dyg-collab/codecrafters-http-server-cpp.git
+cd codecrafters-http-server-cpp
+
+# build (single-file)
+g++ -std=c++17 src/main.cpp -O2 -o http-server
+
+# run (serve files from /tmp/http-files)
+mkdir -p /tmp/http-files
+./http-server --directory /tmp/http-files --port 4221
