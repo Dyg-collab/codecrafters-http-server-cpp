@@ -12,20 +12,6 @@ Built as part of the **Build Your Own HTTP Server** challenge on CodeCrafters.
 
 ---
 
-## Table of contents
-
-- [Why this project](#why-this-project)  
-- [Highlights](#highlights)  
-- [Quickstart](#quickstart)  
-- [Usage examples](#usage-examples)  
-- [Design & architecture](#design--architecture)  
-- [Progress & changelog](#progress--changelog)  
-- [Roadmap](#roadmap)  
-- [Contributing & intern notes](#contributing--intern-notes)  
-- [License & author](#license--author)
-
----
-
 ## Why this project
 
 This repo is a compact, focused demonstration of systems-level skills valuable for internships and junior systems roles:
