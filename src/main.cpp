@@ -22,6 +22,22 @@ if(bytes <= 0){
 std::string request(buffer);
 std::istringstream request_stream(request);
 
+size_t header_end = request.find("\r\n\r\n");
+std::string body = "";
+
+if(header_end != std::string::npos){
+  body = request.substr(header_end + 4);
+}
+
+int content_length = 0;
+size_t pos = request.find("Content-Length:");
+if(pos != std::string::npos){
+  size_t end = request.find("\r\n",pos);
+  std::string len = request.substr(pos+15,end-(pos+15));
+  content_length = std::stoi(len);
+}
+
+
 std::string method;
 std::string path;
 std::string version;
@@ -60,29 +76,44 @@ if (path == "/") {
     "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/plain\r\n"
     "Content-Length: " + std::to_string(user_agent.size()) + "\r\n\r\n" + user_agent;
-    }  else if(path.size()>=7 && path.substr(0,7)=="/files/"){
-      std::string filename = path.substr(7);
-      std::ifstream file(directory + "/" +filename);
-      if(!file.is_open()){
-        response = "HTTP/1.1 404 Not Found\r\n\r\n";
-      } else {
-      std::stringstream buffer;
-      buffer<<file.rdbuf(); // rdbuf = raw data buffer
-      std::string body = buffer.str();
-      
-      response = 
-      "HTTP/1.1 200 OK\r\n"
-      "Content-Type: application/octet-stream\r\n"
-      "Content-Length: "+std::to_string(body.size()) + "\r\n\r\n" + body;}
-      } else {
+    } 
+ else if(path.size()>=7 && path.substr(0,7)=="/files/"){
+    std::string filename = path.substr(7);
+
+    if(method == "GET"){
+        std::ifstream file(directory + "/" + filename);
+
+        if(!file.is_open()){
+            response = "HTTP/1.1 404 Not Found\r\n\r\n";
+        } else {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            std::string file_body = buffer.str();
+
+            response =
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: application/octet-stream\r\n"
+            "Content-Length: " + std::to_string(file_body.size()) + "\r\n\r\n" + file_body;
+        }
+    }
+    else if(method == "POST"){
+        std::ofstream file(directory + "/" + filename, std::ios::binary);
+        file << body;
+        file.close();
+
+        response = "HTTP/1.1 201 Created\r\n\r\n";
+    }
+}
+else {
     response = "HTTP/1.1 404 Not Found\r\n\r\n";
-} 
+}
 
 send(client_fd, response.c_str(), response.size(), 0);
 
   close(client_fd);
   
 }
+
 
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
