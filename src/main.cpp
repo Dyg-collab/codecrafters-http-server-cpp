@@ -50,7 +50,7 @@ std::string response;
 
 std::string user_agent;
 std::string line;
-
+bool gzip_supported = false;
 while(std::getline(request_stream,line)){
   if(line.substr(0,11) == "User-Agent:"){
     user_agent = line.substr(12);
@@ -58,7 +58,11 @@ while(std::getline(request_stream,line)){
     if(!user_agent.empty() && user_agent.back()=='\r'){
       user_agent.pop_back();
     }
-    break;
+  }
+  if(line.substr(0,16) == "Accept-Encoding:"){
+    if(line.find("gzip")!= std::string::npos){
+      gzip_supported = true;
+    }
   }
 }
 
@@ -66,9 +70,11 @@ if (path == "/") {
     response = "HTTP/1.1 200 OK\r\n\r\n";
 } else if(path.size() >= 6 && path.substr(0,6) == "/echo/"){
     std::string msg = path.substr(6);
-
-    response = 
-    "HTTP/1.1 200 OK\r\n"
+    response = "HTTP/1.1 200 OK\r\n";
+    if(gzip_supported){
+      response += "Content-Encoding: gzip\r\n";
+    }
+    response += 
     "Content-Type: text/plain\r\n"
     "Content-Length: " + std::to_string(msg.size()) + "\r\n\r\n" + msg;
 } else if(path == "/user-agent"){
