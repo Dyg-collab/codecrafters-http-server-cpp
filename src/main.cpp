@@ -10,6 +10,36 @@
 #include <sstream>
 #include <thread>
 #include <fstream>
+#include <zlib.h>
+
+std::string gzip(const std::string &data) {
+    z_stream zs{};
+    deflateInit2(&zs, Z_BEST_COMPRESSION, Z_DEFLATED,
+                 15 + 16, 8, Z_DEFAULT_STRATEGY); 
+    // 15+16 tells zlib to produce gzip format
+
+    zs.next_in = (Bytef*)data.data();
+    zs.avail_in = data.size();
+
+    int ret;
+    char outbuffer[32768];
+    std::string outstring;
+
+    do {
+        zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
+        zs.avail_out = sizeof(outbuffer);
+
+        ret = deflate(&zs, Z_FINISH);
+
+        outstring.append(outbuffer, sizeof(outbuffer) - zs.avail_out);
+
+    } while (ret == Z_OK);
+
+    deflateEnd(&zs);
+
+    return outstring;
+}
+
 
 void handle_client(int client_fd , std::string directory){
   char buffer[1024] = {0};
@@ -70,13 +100,19 @@ if (path == "/") {
     response = "HTTP/1.1 200 OK\r\n\r\n";
 } else if(path.size() >= 6 && path.substr(0,6) == "/echo/"){
     std::string msg = path.substr(6);
-    response = "HTTP/1.1 200 OK\r\n";
+    
     if(gzip_supported){
-      response += "Content-Encoding: gzip\r\n";
+    std::string compressed = gzip(msg);
+    response = "HTTP/1.1 200 OK\r\n"
+    "Content-Encoding: gzip\r\n"
+    "Content-Type: text/plain\r\n"
+    "Content-Length: " + std::to_string(compressed.size()) + "\r\n\r\n" + compressed;
     }
-    response += 
+    else {
+    response = "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/plain\r\n"
     "Content-Length: " + std::to_string(msg.size()) + "\r\n\r\n" + msg;
+    }
 } else if(path == "/user-agent"){
     response =
     "HTTP/1.1 200 OK\r\n"
