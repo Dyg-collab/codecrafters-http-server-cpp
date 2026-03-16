@@ -42,13 +42,15 @@ std::string gzip(const std::string &data) {
 
 
 void handle_client(int client_fd , std::string directory){
+  while(true){
   char buffer[1024] = {0};
 ssize_t bytes= recv(client_fd, buffer, sizeof(buffer), 0);
 
 if(bytes <= 0){
   close(client_fd);
-  return;
+  break;
 }
+
 std::string request(buffer);
 std::istringstream request_stream(request);
 
@@ -151,7 +153,7 @@ else {
 }
 
 send(client_fd, response.c_str(), response.size(), 0);
-
+}
   close(client_fd);
   
 }
