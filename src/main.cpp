@@ -47,7 +47,6 @@ void handle_client(int client_fd , std::string directory){
 ssize_t bytes= recv(client_fd, buffer, sizeof(buffer), 0);
 
 if(bytes <= 0){
-  close(client_fd);
   break;
 }
 
