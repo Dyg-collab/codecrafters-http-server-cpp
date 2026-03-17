@@ -82,6 +82,8 @@ std::string response;
 std::string user_agent;
 std::string line;
 bool gzip_supported = false;
+bool connection_close = false;
+
 while(std::getline(request_stream,line)){
   if(line.substr(0,11) == "User-Agent:"){
     user_agent = line.substr(12);
@@ -93,6 +95,11 @@ while(std::getline(request_stream,line)){
   if(line.substr(0,16) == "Accept-Encoding:"){
     if(line.find("gzip")!= std::string::npos){
       gzip_supported = true;
+    }
+  }
+  if(line.substr(0,11) == "Connection:"){
+    if(line.find("close") != std::string::npos){
+      connection_close = true;
     }
   }
 }
@@ -151,7 +158,15 @@ else {
     response = "HTTP/1.1 404 Not Found\r\n\r\n";
 }
 
+if(connection_close){
+    response.insert(response.find("\r\n") + 2, "Connection: close\r\n");
+}
+
 send(client_fd, response.c_str(), response.size(), 0);
+
+if(connection_close){
+  break;
+}
 }
   close(client_fd);
   
