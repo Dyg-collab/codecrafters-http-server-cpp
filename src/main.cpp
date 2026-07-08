@@ -104,7 +104,10 @@ void handle_client(int client_fd, std::string directory) {
         std::string response;
 
         if (path == "/") {
-            response = "HTTP/1.1 200 OK\r\n\r\n";
+        response =
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Length: 0\r\n"
+        "\r\n";
         } else if (path.rfind("/echo/", 0) == 0) {
             std::string msg = path.substr(6);
             if (gzip_supported) {
