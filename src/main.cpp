@@ -104,10 +104,7 @@ void handle_client(int client_fd, std::string directory) {
         std::string response;
 
         if (path == "/") {
-        response =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Length: 0\r\n"
-        "\r\n";
+            response = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n";
         } else if (path.rfind("/echo/", 0) == 0) {
             std::string msg = path.substr(6);
             if (gzip_supported) {
@@ -131,7 +128,7 @@ void handle_client(int client_fd, std::string directory) {
             if (method == "GET") {
                 std::ifstream file(directory + "/" + filename, std::ios::binary);
                 if (!file.is_open()) {
-                    response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                    response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
                 } else {
                     std::stringstream ss;
                     ss << file.rdbuf();
@@ -144,10 +141,10 @@ void handle_client(int client_fd, std::string directory) {
                 std::ofstream file(directory + "/" + filename, std::ios::binary);
                 file.write(body.data(), body.size()); // full body, not truncated
                 file.close();
-                response = "HTTP/1.1 201 Created\r\n\r\n";
+                response = "HTTP/1.1 201 Created\r\nContent-Length: 0\r\n\r\n";
             }
         } else {
-            response = "HTTP/1.1 404 Not Found\r\n\r\n";
+            response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
         }
 
         if (connection_close) {
